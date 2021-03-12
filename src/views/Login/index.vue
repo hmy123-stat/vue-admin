@@ -1,49 +1,46 @@
 <template>
- <!-- template下必须包裹一个层父元素，否则会报错。父元素不一定是div，其他的也可以 -->
-    <div id="login"> 
-       <!-- 这里是内容区 -->
-       <div class="login-wrap">
-           <ul class="menu-tab">
-               <li :class="{'current':item.current}"  v-for="item in menuTab"  :key="item.id" @click="toggleMenu(item)">{{item.txt}}</li>
-           </ul>
-           <!-- 表单的开始 -->
-           <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm"  class="login-form" size="medium">
-
+  <!-- template下必须包裹一个层父元素，否则会报错。父元素不一定是div，其他的也可以 -->
+  <div id="login">
+    <!-- 这里是内容区 -->
+    <div class="login-wrap">
+      <ul class="menu-tab">
+        <li :class="{'current':item.current}" v-for="item in menuTab" :key="item.id" @click="toggleMenu(item)">{{item.txt}}</li>
+      </ul>
+      <!-- 表单的开始 -->
+      <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm"  class="login-form" size="medium">
         <el-form-item prop="username">
-            <label >邮箱</label>
-            <el-input type="text" v-model="ruleForm.username" autocomplete="off" class="item-form"></el-input>
+          <label >邮箱</label>
+          <el-input type="text" v-model="ruleForm.username" autocomplete="off" class="item-form"></el-input>
         </el-form-item>
-
         <el-form-item prop="password">
-            <label >密码</label>
-            <el-input type="text" v-model="ruleForm.password" autocomplete="off" class="item-form" minlength="6" maxlength="20"></el-input>
+          <label >密码</label>
+          <el-input type="text" v-model="ruleForm.password" autocomplete="off" class="item-form" minlength="6" maxlength="20"></el-input>
         </el-form-item>
-
-        <el-form-item prop="passwords"   v-show="model === 'register'">
-            <label  >重复密码</label>
-            <el-input type="text" v-model="ruleForm.passwords" autocomplete="off" class="item-form" minlength="6" maxlength="20"></el-input>
-        </el-form-item>
-
-        <el-form-item  prop="code" class="item-form" >
-            <label >验证码</label>
-            <el-row :gutter="11">
+        <el-form-item prop="passwords" v-show="model === 'register'">
+          <label>重复密码</label>
+          <el-input type="text" v-model="ruleForm.passwords" autocomplete="off" class="item-form" minlength="6" maxlength="20"></el-input>
+      </el-form-item>
+      <el-form-item  prop="code" class="item-form" >
+        <label >验证码</label>
+          <el-row :gutter="11">
                 <!-- Layout 布局通过基础的 24 分栏，迅速简便地创建布局。：span之和相加为24 -->
                 <el-col :span="14">  
                     <el-input v-model.number="ruleForm.code" class="item-form"  minlength="6" maxlength="6" ></el-input>
                 </el-col>
                  <el-col :span="10">
-                    <el-button type="success" class="block">获取验证码</el-button>
+                    <el-button type="success" class="block" @click="getSms()">获取验证码</el-button>
                 </el-col>   
             </el-row>
         </el-form-item>
         <el-form-item>
-            <el-button type="danger" @click="submitForm('ruleForm')" class="login-btn  block">提交</el-button>
+            <el-button type="danger" @click="submitForm('ruleForm')" class="login-btn block">提交</el-button>
         </el-form-item>
         </el-form>
        </div>
     </div>
 </template>
 <script>
+import {GetSms} from "@/api/login";
 import {reactive,ref, isRef, toRefs, onMounted} from '@vue/composition-api';
 import {stripscript,validateEmail,validatePass,validateCodes} from '@/utils/validate';
 export default{
@@ -51,28 +48,28 @@ export default{
     // setup(props,context){
     setup(props,{ refs }){
       // 这里面放置data数据、生命周期、自定义函数
-       //  验证用户名
+      //  验证用户名
       let validateUsername= (rule, value, callback) => {
         if (value === '') {
-          callback(new Error('请输入用户名'));
+          callback(new Error("请输入用户名"));
         } else if(validateEmail(value)){
-            callback(new Error ('用户名格式有误'));  
+            callback(new Error ("用户名格式有误"));  
         } else{
           callback();   //true
-        }
-      };
-    //   验证密码
+      }
+    };
+    //验证密码
       let validatePassword = (rule, value, callback) => {
-        // console.log(stripscript(value));
-        // 绑定过滤后的数据
+      //console.log(stripscript(value));
+      //绑定过滤后的数据
         ruleForm.password = (stripscript(value));
         value = ruleForm.password;
         let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/;  
-        if (value === '') {
-          callback(new Error('请输入密码'));
-        } else if (validatePass(value)) {
-          callback(new Error('密码为6至20位数字+字母'));
-        } else {
+        if (value === ''){
+          callback(new Error("请输入密码"));
+        }else if(validatePass(value)){
+          callback(new Error("密码为6至20位数字+字母"));
+        }else{
           callback();
         }
       };
@@ -86,9 +83,9 @@ export default{
         value = ruleForm.passwords;
         let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/;  
         if (value === '') {
-          callback(new Error('请再次输入密码'));
+          callback(new Error("请再次输入密码"));
         } else if (value != this.ruleForm.password) {
-          callback(new Error('重复密码错误'));
+          callback(new Error("重复密码错误"));
         } else {
           callback();
         }
@@ -96,23 +93,23 @@ export default{
     //   验证验证码
       var validateCode = (rule, value, callback) => {
         if (!value) {
-          return callback(new Error('请输入验证码'));
+          return callback(new Error("请输入验证码"));
         }
         else if(validateCodes(value)){
-            return callback(new Error('验证码格式有误'));   
+            return callback(new Error("验证码格式有误"));   
         }else{
             callback();
         }
       };
     const menuTab= reactive([
-      {txt:'登录',current:true,type:'login'},
-      {txt:'注册',current:false,type:'register'}
-            ])
+      {txt:"登录",current:true,type:'login'},
+      {txt:"注册",current:false,type:'register'}
+    ])
     // console.log(menuTab)
     // 模块值
-    const model = ref ('login')
+    const model = ref ('login');
     // console.log(model.value)
-     //表单绑定数据
+    //表单绑定数据
     const  ruleForm = reactive({
       username: '',
       password: '',
@@ -121,19 +118,19 @@ export default{
       })
     // 表单的验证
     const rules = reactive({
-        username: [
-            { validator:validateUsername, trigger: 'blur' }
-        ],
-        password: [
-            { validator: validatePassword, trigger: 'blur' }
-        ],
-        passwords: [
-            { validator: validatePasswords, trigger: 'blur' }
-        ],
-        code: [
-            { validator: validateCode, trigger: 'blur' }
-        ]
-        })
+      username: [
+        { validator:validateUsername, trigger: 'blur' }
+      ],
+      password: [
+        { validator: validatePassword, trigger: 'blur' }
+      ],
+      passwords: [
+        { validator: validatePasswords, trigger: 'blur' }
+      ],
+      code: [
+        { validator: validateCode, trigger: 'blur' }
+      ],
+    })
     //声明函数
     const toggleMenu = (data =>{ 
       // console.log(data)
@@ -141,54 +138,55 @@ export default{
       menuTab.forEach((elem,index) => {
           elem.current = false
       });
-      // 高光
+      //高光
       data.current = true;
-  //    修改模块值
+      //修改模块值
       model.value = data.type;
-      })
-  // 表单的方法
-    const  submitForm = (formName => {
+    })
+    // 获取验证码
+    const getSms = (() => {
+      GetSms({ username: ruleForm.username })
+    })
+    //表单的方法
+    const submitForm = (formName => {
       refs[formName].validate((valid) => {
       if (valid) {
         alert('submit!');
       } else {
         console.log('error submit!!');
         return false;
-      }
+        }
+      })
     })
-  })
    // 生命周期，挂载完成后
     onMounted(() => {
-
     })
-  return{
+   return{
     menuTab,
     model,
     ruleForm,
     rules,
     toggleMenu,
-    submitForm
+    submitForm,
+    getSms
   } 
-},
-
+  },
 }
 </script>
-//  Lang=“scss”：写义类型
-Scoped：局部，定义时：只有当前文件应用样式。否则为全局样式
+/*Lang=“scss”：写义类型,Scoped：局部，定义时：只有当前文件应用样式。否则为全局样式*/
 <style lang="scss" scoped>
-#login{
+  #login{
     height: 100vh;
     background-color: #344a5f;
-
-}
-.login-wrap{
+  }
+  .login-wrap{
     width: 330px;
     margin:auto;
-}
-.menu-tab{
+  }
+  .menu-tab{
     text-align: center;  
-}
-.menu-tab li{
+  }
+  .menu-tab li{
     display: inline-block;
     width: 88px;
     line-height: 36px;
@@ -196,11 +194,11 @@ Scoped：局部，定义时：只有当前文件应用样式。否则为全局�
     color: #fff;
     border-radius: 2px;
     cursor: pointer;
-}
-.current{
+  }
+  .current{
     background-color: rgba(0,0,0,0.1);
-}
-.login-form{
+  }
+  .login-form{
     margin-top: 29px; 
     label{
     display: block;
@@ -208,21 +206,14 @@ Scoped：局部，定义时：只有当前文件应用样式。否则为全局�
     color: #fff;
     margin-bottom:3px;
     margin-top:13px;
-}
-//     .item-form{
-//        margin-bottom: 13px;
-// }
+  }
     .block{
-        display: block;
-        width: 100%;
-    
-}
+      display: block;
+      width: 100%;  
+    }
     .login-btn{
-        display: block;
-        margin-top:32px;
-}
-
-}
-
-
+      display: block;
+      margin-top:32px;
+    }
+  }
 </style>

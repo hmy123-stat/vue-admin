@@ -3,7 +3,7 @@ export  function stripscript(str) {
     var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）&;—|{ }【】‘；：”“'。，、？]")
     var rs = "";
     for (var i = 0; i < str.length; i++) {
-            rs = rs + str.substr(i, 1).replace(pattern, '');
+        rs = rs + str.substr(i, 1).replace(pattern, '');
     }
     return rs;
  }  
@@ -16,7 +16,6 @@ export  function validateEmail(value) {
     }else{
         return false
     }
-
  }  
 // 验证密码6至20位的字母+数字
 export function  validatePass(value){
@@ -32,3 +31,4 @@ export function validateCodes(value){
     let reg = /^[a-z0-9]{6}$/;
     return !reg.test(value) ? true : false
 }
+// 没有使用export defaul 时，文件import需要使用花括号，可以同时声明存在多个export
